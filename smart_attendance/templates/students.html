@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Students – AttendAI</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}"/>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+</head>
+<body>
+
+<nav class="sidebar">
+  <div class="sidebar-brand">
+    <span class="brand-icon">◈</span>
+    <span class="brand-text">AttendAI</span>
+  </div>
+  <ul class="nav-links">
+    <li><a href="/"><span>⌂</span> Dashboard</a></li>
+    <li class="active"><a href="/students"><span>◉</span> Students</a></li>
+    <li><a href="/report"><span>≡</span> Reports</a></li>
+    <li><a href="/api/export/today" target="_blank"><span>↓</span> Export Today</a></li>
+    <li><a href="/api/export/all" target="_blank"><span>↓</span> Export All</a></li>
+  </ul>
+  <div class="sidebar-footer">
+    <span class="live-dot"></span> Live Session
+  </div>
+</nav>
+
+<main class="main-content">
+  <header class="page-header">
+    <div>
+      <h1>Registered Students</h1>
+      <p class="subhead">{{ students|length }} student(s) in database</p>
+    </div>
+    <div class="header-actions">
+      <span class="clock" id="live-clock">--:--:--</span>
+    </div>
+  </header>
+
+  <section class="table-section">
+    <div class="table-header">
+      <h2>Student Registry</h2>
+      <input type="text" id="search-input" placeholder="Search name or ID…" oninput="filterTable(this.value)"/>
+    </div>
+    <div class="table-wrapper">
+      <table id="attendance-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Student ID</th>
+            <th>Name</th>
+            <th>Registered On</th>
+            <th>Face Data</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for s in students %}
+          <tr>
+            <td class="mono">{{ loop.index }}</td>
+            <td class="mono">{{ s.student_id }}</td>
+            <td><strong>{{ s.name }}</strong></td>
+            <td class="mono">{{ s.registered_on }}</td>
+            <td><span class="badge badge-green">✓ Encoded</span></td>
+          </tr>
+          {% else %}
+          <tr><td colspan="5" class="empty-row">No students registered yet. Run <code>python capture_faces.py</code></td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <div class="info-box">
+    <h3>How to Register a New Student</h3>
+    <p>Stop the Flask server, then run in terminal:</p>
+    <pre><code>python capture_faces.py</code></pre>
+    <p>For multiple students at once:</p>
+    <pre><code>python capture_faces.py --multi</code></pre>
+    <p>Restart the server afterwards: <code>python app.py</code></p>
+  </div>
+</main>
+
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+</body>
+</html>

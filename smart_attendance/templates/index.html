@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Smart Attendance Dashboard</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}"/>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+</head>
+<body>
+
+<!-- ── SIDEBAR NAV ───────────────────────────────────────────────── -->
+<nav class="sidebar">
+  <div class="sidebar-brand">
+    <span class="brand-icon">◈</span>
+    <span class="brand-text">AttendAI</span>
+  </div>
+  <ul class="nav-links">
+    <li class="active"><a href="/"><span>⌂</span> Dashboard</a></li>
+    <li><a href="/students"><span>◉</span> Students</a></li>
+    <li><a href="/report"><span>≡</span> Reports</a></li>
+    <li><a href="/api/export/today" target="_blank"><span>↓</span> Export Today</a></li>
+    <li><a href="/api/export/all" target="_blank"><span>↓</span> Export All</a></li>
+  </ul>
+  <div class="sidebar-footer">
+    <span class="live-dot"></span> Live Session
+  </div>
+</nav>
+
+<!-- ── MAIN CONTENT ──────────────────────────────────────────────── -->
+<main class="main-content">
+
+  <!-- Header -->
+  <header class="page-header">
+    <div>
+      <h1>Attendance Dashboard</h1>
+      <p class="subhead">Today — <span id="live-date">{{ summary.date }}</span></p>
+    </div>
+    <div class="header-actions">
+      <button onclick="refreshData()" class="btn-refresh">⟳ Refresh</button>
+      <span class="clock" id="live-clock">--:--:--</span>
+    </div>
+  </header>
+
+  <!-- ── STAT CARDS ─────────────────────────────────────────────── -->
+  <section class="stats-grid">
+    <div class="stat-card card-blue">
+      <div class="stat-label">Total Students</div>
+      <div class="stat-value" id="stat-total">{{ summary.total_students }}</div>
+      <div class="stat-icon">◉</div>
+    </div>
+    <div class="stat-card card-green">
+      <div class="stat-label">Present</div>
+      <div class="stat-value" id="stat-present">{{ summary.present }}</div>
+      <div class="stat-icon">✓</div>
+    </div>
+    <div class="stat-card card-red">
+      <div class="stat-label">Absent</div>
+      <div class="stat-value" id="stat-absent">{{ summary.absent }}</div>
+      <div class="stat-icon">✗</div>
+    </div>
+    <div class="stat-card card-yellow">
+      <div class="stat-label">Attentive</div>
+      <div class="stat-value" id="stat-attentive">{{ summary.attentive }}</div>
+      <div class="stat-icon">◎</div>
+    </div>
+    <div class="stat-card card-orange">
+      <div class="stat-label">Distracted</div>
+      <div class="stat-value" id="stat-distracted">{{ summary.distracted }}</div>
+      <div class="stat-icon">◌</div>
+    </div>
+  </section>
+
+  <!-- ── PROGRESS BAR ───────────────────────────────────────────── -->
+  <section class="attendance-bar-section">
+    <div class="bar-label">
+      <span>Attendance Rate</span>
+      <strong id="bar-pct">
+        {% if summary.total_students > 0 %}
+          {{ ((summary.present / summary.total_students) * 100) | round(1) }}%
+        {% else %}0%{% endif %}
+      </strong>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progress-fill"
+           style="width: {% if summary.total_students > 0 %}{{ ((summary.present / summary.total_students) * 100) | round(1) }}{% else %}0{% endif %}%">
+      </div>
+    </div>
+    <div class="bar-label" style="margin-top:8px">
+      <span>Attention Rate</span>
+      <strong id="attn-pct">
+        {% if summary.present > 0 %}
+          {{ ((summary.attentive / summary.present) * 100) | round(1) }}%
+        {% else %}—{% endif %}
+      </strong>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill attention-fill" id="attention-fill"
+           style="width: {% if summary.present > 0 %}{{ ((summary.attentive / summary.present) * 100) | round(1) }}{% else %}0{% endif %}%">
+      </div>
+    </div>
+  </section>
+
+  <!-- ── ATTENDANCE TABLE ───────────────────────────────────────── -->
+  <section class="table-section">
+    <div class="table-header">
+      <h2>Today's Attendance</h2>
+      <input type="text" id="search-input" placeholder="Search name or ID…" oninput="filterTable(this.value)"/>
+    </div>
+
+    <div class="table-wrapper">
+      <table id="attendance-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Student ID</th>
+            <th>Name</th>
+            <th>Time In</th>
+            <th>Attention Score</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="attendance-body">
+          {% for row in attendance %}
+          <tr>
+            <td class="mono">{{ loop.index }}</td>
+            <td class="mono">{{ row.student_id }}</td>
+            <td><strong>{{ row.name }}</strong></td>
+            <td class="mono">{{ row.time }}</td>
+            <td>
+              <div class="score-bar-wrap">
+                <div class="score-bar" style="width:{{ row.attention_score }}%"
+                     data-score="{{ row.attention_score }}"></div>
+                <span class="score-num">{{ row.attention_score }}%</span>
+              </div>
+            </td>
+            <td>
+              <span class="badge {% if row.status == 'Attentive' %}badge-green{% else %}badge-orange{% endif %}">
+                {{ row.status }}
+              </span>
+            </td>
+          </tr>
+          {% else %}
+          <tr><td colspan="6" class="empty-row">No attendance records for today yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+</main>
+
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+</body>
+</html>

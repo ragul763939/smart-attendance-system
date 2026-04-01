@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Reports – AttendAI</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}"/>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+</head>
+<body>
+
+<nav class="sidebar">
+  <div class="sidebar-brand">
+    <span class="brand-icon">◈</span>
+    <span class="brand-text">AttendAI</span>
+  </div>
+  <ul class="nav-links">
+    <li><a href="/"><span>⌂</span> Dashboard</a></li>
+    <li><a href="/students"><span>◉</span> Students</a></li>
+    <li class="active"><a href="/report"><span>≡</span> Reports</a></li>
+    <li><a href="/api/export/today" target="_blank"><span>↓</span> Export Today</a></li>
+    <li><a href="/api/export/all" target="_blank"><span>↓</span> Export All</a></li>
+  </ul>
+  <div class="sidebar-footer">
+    <span class="live-dot"></span> Live Session
+  </div>
+</nav>
+
+<main class="main-content">
+  <header class="page-header">
+    <div>
+      <h1>Attendance Reports</h1>
+      <p class="subhead">All-time records — {{ records|length }} entries</p>
+    </div>
+    <div class="header-actions">
+      <a href="/api/export/all" class="btn-refresh">↓ Download CSV</a>
+      <span class="clock" id="live-clock">--:--:--</span>
+    </div>
+  </header>
+
+  <!-- Filter bar -->
+  <section class="table-section">
+    <div class="table-header">
+      <h2>All Records</h2>
+      <input type="text" id="search-input" placeholder="Filter by name, ID, date…" oninput="filterTable(this.value)"/>
+    </div>
+
+    <div class="table-wrapper">
+      <table id="attendance-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Date</th>
+            <th>Student ID</th>
+            <th>Name</th>
+            <th>Time In</th>
+            <th>Attn. Score</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in records %}
+          <tr>
+            <td class="mono">{{ loop.index }}</td>
+            <td class="mono">{{ row.date }}</td>
+            <td class="mono">{{ row.student_id }}</td>
+            <td><strong>{{ row.name }}</strong></td>
+            <td class="mono">{{ row.time }}</td>
+            <td>
+              <div class="score-bar-wrap">
+                <div class="score-bar" style="width:{{ row.attention_score }}%"></div>
+                <span class="score-num">{{ row.attention_score }}%</span>
+              </div>
+            </td>
+            <td>
+              <span class="badge {% if row.status == 'Attentive' %}badge-green{% else %}badge-orange{% endif %}">
+                {{ row.status }}
+              </span>
+            </td>
+          </tr>
+          {% else %}
+          <tr><td colspan="7" class="empty-row">No records yet. Start the attendance runner to begin logging.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,33 @@
+# ─────────────────────────────────────────────
+# Smart Attendance & Behavior Analysis System
+# Python Dependencies
+# ─────────────────────────────────────────────
+
+# Core computer vision library
+opencv-python==4.9.0.80
+
+# Face recognition (wraps dlib under the hood)
+# Requires: cmake, dlib (auto-installed as dependency)
+face-recognition==1.3.0
+
+# dlib – facial landmark detection (68-point model)
+# If this fails, install cmake first:
+#   Windows: https://cmake.org/download/
+#   macOS:   brew install cmake
+#   Linux:   sudo apt install cmake build-essential
+dlib==19.24.2
+
+# Numerical computing (arrays, math ops)
+numpy==1.26.4
+
+# Web framework for the dashboard
+flask==3.0.3
+
+# Data manipulation and CSV export
+pandas==2.2.2
+
+# Image processing (face capture utility)
+Pillow==10.3.0
+
+# Progress bars for encoding step
+tqdm==4.66.4
